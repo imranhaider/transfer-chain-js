@@ -13,6 +13,8 @@ const getAddress = (key, length = 64) => {
 const FAMILY = 'subscription-chain'
 const PREFIX = getAddress(FAMILY, 6)
 
+console.log(PREFIX);
+
 const getAssetAddress = name => PREFIX + '00' + getAddress(name, 62);
 const getTransferAddress = asset => PREFIX + '01' + getAddress(asset, 62);
 

@@ -12,8 +12,8 @@ const KEY_NAME = 'subscription-chain.keys'
 const API_URL = 'http://localhost:8008'
 
 const FAMILY = 'subscription-chain'
-const VERSION = '1.0'
-const PREFIX = '19d832'
+const VERSION = '0.0'
+const PREFIX = 'a657a9'
 
 // Fetch key-pairs from localStorage
 const getKeys = () => {
