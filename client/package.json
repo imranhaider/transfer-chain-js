@@ -1,5 +1,5 @@
 {
-  "name": "transfer-chain-client",
+  "name": "subscription-chain-client",
   "version": "0.0.0",
   "description": "A simple browser based blockchain client",
   "main": "",

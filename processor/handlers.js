@@ -10,11 +10,11 @@ const getAddress = (key, length = 64) => {
   return createHash('sha512').update(key).digest('hex').slice(0, length)
 }
 
-const FAMILY = 'transfer-chain'
+const FAMILY = 'subscription-chain'
 const PREFIX = getAddress(FAMILY, 6)
 
-const getAssetAddress = name => PREFIX + '00' + getAddress(name, 62)
-const getTransferAddress = asset => PREFIX + '01' + getAddress(asset, 62)
+const getAssetAddress = name => PREFIX + '00' + getAddress(name, 62);
+const getTransferAddress = asset => PREFIX + '01' + getAddress(asset, 62);
 
 const encode = obj => Buffer.from(JSON.stringify(obj, Object.keys(obj).sort()))
 const decode = buf => JSON.parse(buf.toString())
@@ -105,7 +105,7 @@ const rejectTransfer = (asset, signer, state) => {
 }
 
 // Handler for JSON encoded payloads
-class JSONHandler extends TransactionHandler {
+class SubscriptionHandler extends TransactionHandler {
   constructor () {
     console.log('Initializing JSON handler for Transfer-Chain')
     super(FAMILY, '0.0', 'application/json', [PREFIX])
@@ -136,5 +136,5 @@ class JSONHandler extends TransactionHandler {
 }
 
 module.exports = {
-  JSONHandler
+  SubscriptionHandler
 }

@@ -8,11 +8,11 @@ const {
 } = require('sawtooth-sdk/client')
 
 // Config variables
-const KEY_NAME = 'transfer-chain.keys'
+const KEY_NAME = 'subscription-chain.keys'
 const API_URL = 'http://localhost:8008'
 
-const FAMILY = 'transfer-chain'
-const VERSION = '0.0'
+const FAMILY = 'subscription-chain'
+const VERSION = '1.0'
 const PREFIX = '19d832'
 
 // Fetch key-pairs from localStorage
