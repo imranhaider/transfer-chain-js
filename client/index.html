@@ -2,47 +2,146 @@
 <html>
 
 <head>
-  <title>Subscription Chain</title>
+  <title>Firefly</title>
 </head>
 
 <body>
-  <h1>Subscription</h1>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="#">Firefly</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link accounts" href="#">Accounts <span class="sr-only"></span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link ownerLink" href="#">My Assets</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link subscriberLink" href="#">Subscription</a>
+        </li>        
+        
+      </ul>
+      
+    </div>
+  </nav>
+
+
 
   <div class="container">
-    <h2>Select User</h2>
-    <select name="keySelect">
-      <option value="none" selected>Select public key...</option>
-      <option value="new">Create new key pair</option>
-    </select>
 
-    <h2>Create Asset</h2>
-    <input id="createName" type="text" placeholder="Enter asset name...">
-    <input id="createSubmit" type="button" value="Create">
+    <div id="user" class="">
+      <div style="margin-top: 50px; margin-bottom: 30px;">
+        <div class="form-group">
+          <input style="width: 400px;" class="col-md-8" id="enterTitle" type="text" placeholder="Enter Account Title"
+            required />
+          <input class="btn btn-success col-md-2 " id="createAccount" type="button" value="Create Account" />
+        </div>
+      </div>
+      <div class="form-group">
+        <h4>Select Account</h4>
+        <select class="form-control" name="keySelect">
+          <option value="none" selected>Select public key...</option>
+        </select>
+      </div>
+    </div>
 
-    <h2>Subscribe Asset</h2>
-    <select name="assetSelect">
-      <option value="none" selected>Select asset...</option>
-    </select>
-    <select name="transferSelect">
-      <option value="none" selected>Select recipient...</option>
-    </select>
-    <input id="transferSubmit" type="button" value="Subscribe">
+    <div id="selection" class="container" style="display: none;">
+      <div style="margin-top: 50px;" class="d-flex justify-content-center">
+        <input class="btn btn-primary ownerLink" type="button" value="Asset Owner" id="ownerLink" />
+        <h1>&nbsp;&nbsp; OR &nbsp;&nbsp;</h1>
+        <input class="btn btn-warning subscriberLink" type="button" value="Subscriber" id="subscriberLink" />
+      </div>
+    </div>
 
-    <h2>Accept Subscription</h2>
-    <div id="transferList"></div>
 
-    <h2>Asset List</h2>
-    <table>
-      <tr>
-        <th>Asset</th>
-        <th>Owner</th>
-      </tr>
-      <tbody id="assetList"></tbody>
-    </table>
+    <div id="subscription" style="display: none;">
+
+      <h2>My Subscribed Assets</h2>
+      <br />
+      <table>
+        <tr>
+          <th>Asset</th>
+          <th>Owner</th>
+          <th>Owner Public Key</th>
+          <th>Action</th>
+        </tr>
+        <tbody id="subscribedList"></tbody>
+      </table>
+      <hr />
+      <h2>Available Assets for Subscription</h2>
+      <br />
+      <table>
+        <tr>
+          <th>Asset</th>
+          <th>Owner</th>
+          <th>Owner Public Key</th>
+          <th>Action</th>
+        </tr>
+        <tbody id="subscriableList"></tbody>
+      </table>
+
+
+    </div>
+
+
+    <hr>
+    <div id="owner" class="container" style="display: none;">
+
+      <p class="ownerName">Account</p>
+
+
+      <h2>Create Asset</h2>
+      <input id="createName" type="text" placeholder="Enter asset name" />
+      <input id="createSubmit" calss="btn btn-success " type="button" value="Create" />
+
+      <hr>
+
+      <h2>Asset List</h2>
+      <table>
+        <tr>
+          <th>Asset</th>
+          <th>Owner</th>
+          <th>Owner Public Key</th>
+          <th>Subscriber</th>
+          <th>Action</th>
+        </tr>
+        <tbody id="assetList"></tbody>
+      </table>
+    </div>
+
+    <div id="history" class="container" style="display: none;">
+      <h2>History</h2>
+      <table>
+        <tr>
+          <th>Transaction ID</th>
+          <th>Asset</th>
+          <th>Action</th>
+          <th>Subscriber</th>
+          <th>Date</th>
+        </tr>
+        <tbody id="subscriptionHistory"></tbody>
+      </table>
+    </div>
+    </div>
+
 
   </div>
 
+  <script>
+    $(document).ready(function () {
+
+      $('#subscription').hide();
+      $('#owner').hide();
+      $('#selection').hide();
+    })
+  </script>
   <script src="dist/bundle.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </body>

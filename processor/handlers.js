@@ -17,12 +17,13 @@ console.log(PREFIX);
 
 const getAssetAddress = name => PREFIX + '00' + getAddress(name, 62);
 const getTransferAddress = asset => PREFIX + '01' + getAddress(asset, 62);
+const getSubscriptionAddress = asset => PREFIX + '00' + getAddress(asset, 62);
 
 const encode = obj => Buffer.from(JSON.stringify(obj, Object.keys(obj).sort()))
 const decode = buf => JSON.parse(buf.toString())
 
 // Add a new asset to state
-const createAsset = (asset, owner, state) => {
+const createAsset = (asset, date, owner, ownerPublicKey, state) => {
   const address = getAssetAddress(asset)
 
   return state.get([address])
@@ -33,10 +34,84 @@ const createAsset = (asset, owner, state) => {
       }
 
       return state.set({
-        [address]: encode({name: asset, owner})
+        [address]: encode({ name: asset, owner, createdOn: date, ownerPublicKey, subscriber: null})
       })
     })
 }
+
+// Add a new subscription to state
+const subscribeAsset = (asset, transactionId, date, subscriber, signer, state) => {
+
+  console.log('entered subscription asset');
+  console.log('subscriber : ' + subscriber);
+  console.log('Transaction ID : ' + transactionId);
+
+  const address = getSubscriptionAddress(transactionId);
+  const assetAddress = getAssetAddress(asset);
+
+  return state.get([assetAddress])
+    .then(entries => {
+      const entry = entries[assetAddress]
+      if (!entry || entry.length === 0) {
+        throw new InvalidTransaction('Asset does not exist')
+      }
+
+      if (signer === decode(entry).owner) {
+        throw new InvalidTransaction('Asset\'s owner cannot subscribe it')
+      }
+
+      console.log('updating asset subscriber')
+
+      // update asset record
+      state.set({
+        [assetAddress]: encode({ ...decode(entry), subscriber: subscriber, subscriberPublicKey: signer, lastUpdatedOn: date })
+      });
+
+      console.log('creating asset subscription transaction')
+
+      // add transaction history
+      return state.set({
+        [address]: encode({ asset, transactionId, subscriber, signer, action: "subscribed", date: date })
+      })
+    })
+}
+
+// Add a new subscription to state
+const returnAsset = (asset, transactionId, date, subscriber, signer, state) => {
+  console.log('entered return asset');
+  console.log('subscriber : ' + subscriber);
+  console.log('Transaction ID : ' + transactionId);
+
+  const address = getSubscriptionAddress(transactionId);
+  const assetAddress = getAssetAddress(asset);
+
+  return state.get([assetAddress])
+    .then(entries => {
+      const entry = entries[assetAddress]
+      if (!entry || entry.length === 0) {
+        throw new InvalidTransaction('Asset does not exist')
+      }
+
+      if (signer === decode(entry).owner) {
+        throw new InvalidTransaction('Asset\'s owner cannot subscribe it')
+      }
+
+      console.log('updating asset return')
+
+      // update asset record
+      state.set({
+        [assetAddress]: encode({ ...decode(entry), subscriber: null, subscriberPublicKey: null, lastUpdatedOn: date })
+      });
+
+      console.log('creating asset return transaction')
+
+      // add transaction history
+      return state.set({
+        [address]: encode({ asset, transactionId,subscriber, signer, action: "returned", date: date })
+      })
+    })
+}
+
 
 // Add a new transfer to state
 const transferAsset = (asset, owner, signer, state) => {
@@ -55,7 +130,7 @@ const transferAsset = (asset, owner, signer, state) => {
       }
 
       return state.set({
-        [address]: encode({asset, owner})
+        [address]: encode({ asset, owner })
       })
     })
 }
@@ -79,7 +154,7 @@ const acceptTransfer = (asset, signer, state) => {
 
       return state.set({
         [address]: Buffer(0),
-        [getAssetAddress(asset)]: encode({name: asset, owner: signer})
+        [getAssetAddress(asset)]: encode({ name: asset, owner: signer })
       })
     })
 }
@@ -108,26 +183,31 @@ const rejectTransfer = (asset, signer, state) => {
 
 // Handler for JSON encoded payloads
 class SubscriptionHandler extends TransactionHandler {
-  constructor () {
-    console.log('Initializing JSON handler for Transfer-Chain')
+  constructor() {
+    console.log('Initializing JSON handler for Subscription-Chain')
     super(FAMILY, '0.0', 'application/json', [PREFIX])
   }
 
-  apply (txn, state) {
+  apply(txn, state) {
     // Parse the transaction header and payload
+
+    console.log('entered apply method')
+
     const header = TransactionHeader.decode(txn.header)
     const signer = header.signerPubkey
-    const { action, asset, owner } = JSON.parse(txn.payload)
+    const { action, asset, transactionId, date, owner, subscriber } = JSON.parse(txn.payload)
 
     // Call the appropriate function based on the payload's action
     console.log(`Handling transaction:  ${action} > ${asset}`,
-                owner ? `> ${owner.slice(0, 8)}... ` : '',
-                `:: ${signer.slice(0, 8)}...`)
+      owner ? `> ${owner.slice(0, 8)}... ` : '',
+      `:: ${signer.slice(0, 8)}...`)
 
-    if (action === 'create') return createAsset(asset, signer, state)
-    if (action === 'transfer') return transferAsset(asset, owner, signer, state)
-    if (action === 'accept') return acceptTransfer(asset, signer, state)
-    if (action === 'reject') return rejectTransfer(asset, signer, state)
+    if (action === 'create') return createAsset(asset, date, owner, signer, state);
+    if (action === 'transfer') return transferAsset(asset, owner, signer, state);
+    if (action === 'subscribe') return subscribeAsset(asset, transactionId, date, subscriber, signer, state);
+    if (action === 'return') return returnAsset(asset, transactionId, date, subscriber, signer, state);
+    if (action === 'accept') return acceptTransfer(asset, signer, state);
+    if (action === 'reject') return rejectTransfer(asset, signer, state);
 
     return Promise.resolve().then(() => {
       throw new InvalidTransaction(
